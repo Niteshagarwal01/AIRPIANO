@@ -1,67 +1,41 @@
 Chord Mapping (D Scale)
 
-Hand
+----- SINGLE FINGER CHORDS -----
 
-Finger
+Hand       Finger      Chord
 
-Chord
+Left       Thumb       D Major (D, F#, A)
+Left       Index       E Minor (E, G, B)
+Left       Middle      G Major (G, B, D)
+Left       Ring        A Major (A, C#, E)
+Left       Pinky       D Minor (D, F, A)
 
-Left
+Right      Thumb       A Major (A, C#, E)
+Right      Index       B Minor (B, D, F#)
+Right      Middle      F# Minor (F#, A, C#)
+Right      Ring        G Major (G, B, D)
+Right      Pinky       D Major/7th (D, F#, A, C#)
 
-Thumb
+----- COMBINATION FINGER CHORDS -----
 
-D Major (D, F#, A)
+Hand       Finger Combination    Chord
 
-Left
+Left       Thumb + Index         C# Diminished (C#, E, G)
+Left       Index + Middle        E7 (E, G#, B, D)
+Left       Middle + Ring         G Minor (G, Bb, D)
+Left       Ring + Pinky          A7 (A, C#, E, G)
+Left       Thumb + Pinky         D9 (D, F#, A, C)
 
-Index
+Right      Thumb + Index         A sus4 (A, D, E)
+Right      Index + Middle        F#7 (F#, A#, C#, E)
+Right      Middle + Ring         G7 (G, B, D, F)
+Right      Ring + Pinky          B sus4 (B, E, F#)
+Right      Thumb + Pinky         D13 (D, A, C#, F#)
 
-E Minor (E, G, B)
+----- PLAYING TECHNIQUE -----
 
-Left
-
-Middle
-
-G Major (G, B, D)
-
-Left
-
-Ring
-
-A Major (A, C#, E)
-
-Left
-
-Pinky
-
-D Minor (D, F, A)
-
-Right
-
-Thumb
-
-A Major (A, C#, E)
-
-Right
-
-Index
-
-B Minor (B, D, F#)
-
-Right
-
-Middle
-
-F# Minor (F#, A, C#)
-
-Right
-
-Ring
-
-G Major (G, B, D)
-
-Right
-
-Pinky
-
-D Major/7th (D, F#, A, C#)
+1. Raise a single finger to play its corresponding chord
+2. Raise two fingers simultaneously to play a combination chord
+3. Lower a finger to stop the chord (with sustain)
+4. Chord names will display on screen near your hand position
+5. For best results, ensure good lighting and keep your hand within camera view
