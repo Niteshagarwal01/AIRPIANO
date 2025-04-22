@@ -4,9 +4,9 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn server:app
+    startCommand: cd Air-Piano && gunicorn server:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.12
+        value: 3.11.11
     healthCheckPath: /
     autoDeploy: true
