@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirPiano - Futuristic Music Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00f7ff;
+            --primary-glow: #00aeff;
+            --secondary-color: #fc0fc0;
+            --secondary-glow: #d100ff;
+            --bg-dark: #03001c;
+            --bg-medium: #100a35;
+            --bg-light: #2d1e69;
+            --success: #33ff88;
+            --warning: #ffaa33;
+            --danger: #ff3377;
+            --text-light: #ffffff;
+            --text-dim: #aaaaee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Main Container Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr auto;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 2rem;
+            background: rgba(3, 0, 28, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 247, 255, 0.3);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span:first-child {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .logo span:last-child {
+            color: var(--secondary-color);
+            text-shadow: 0 0 10px var(--secondary-glow);
+        }
+
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0%;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .active-link {
+            color: var(--primary-color);
+        }
+
+        .active-link::after {
+            width: 100%;
+        }
+
+        /* Main Content Area */
+        main {
+            display: grid;
+            grid-template-columns: 320px 1fr 320px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
+            height: calc(100vh - 120px);
+        }
+
+        /* Dashboard Sections */
+        .side-panel {
+            background: rgba(16, 10, 53, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 0 25px rgba(0, 170, 255, 0.15);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.2rem;
+            text-shadow: 0 0 5px var(--primary-glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.3);
+        }
+
+        .controls-section, .settings-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        /* Control Buttons */
+        .btn {
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--bg-medium), var(--bg-light));
+            color: var(--text-light);
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 247, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-glow));
+            color: var(--bg-dark);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 247, 255, 0.4);
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 4px 15px rgba(0, 247, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger), #ff0055);
+            box-shadow: 0 4px 15px rgba(255, 51, 119, 0.4);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Settings and Controls */
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(3, 0, 28, 0.4);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-light);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .slider-value {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-dark);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .selector-container {
+            padding: 0.8rem;
+            border-radius: 8px;
+            background: rgba(3, 0, 28, 0.4);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .selector-label {
+            display: block;
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-light);
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 0.8rem;
+        }
+
+        .selector {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-medium);
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            color: var(--primary-color);
+            outline: none;
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 0 10px rgba(0, 247, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .selector:focus {
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.4);
+        }
+
+        .selector option {
+            background: var(--bg-medium);
+            color: var(--text-light);
+        }
+
+        /* Main Video Feed */
+        .main-display {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+
+        .video-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 2px solid rgba(0, 247, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.2);
+            background: rgba(16, 10, 53, 0.3);
+            backdrop-filter: blur(5px);
+            aspect-ratio: 16/9;
+            margin: 0 auto;
+            width: 100%;
+            max-height: 100%;
+        }
+
+        #video-feed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .overlay-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+        }
+
+        .tracking-status {
+            background: rgba(3, 0, 28, 0.7);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #00ff4c;
+            text-shadow: 0 0 5px rgba(0, 255, 76, 0.5);
+            display: inline-block;
+            border: 1px solid rgba(0, 255, 76, 0.3);
+        }
+
+        .tracking-inactive {
+            color: var(--danger);
+            text-shadow: 0 0 5px rgba(255, 51, 119, 0.5);
+            border-color: rgba(255, 51, 119, 0.3);
+        }
+
+        .instrument-display {
+            background: rgba(3, 0, 28, 0.7);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            display: inline-block;
+            margin-top: 0.5rem;
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+            border: 1px solid rgba(0, 247, 255, 0.3);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .overlay-footer {
+            margin-top: auto;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .active-chord {
+            background: rgba(3, 0, 28, 0.8);
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 0.8rem 2rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-glow);
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            max-width: 80%;
+            box-shadow: 0 0 20px rgba(0, 247, 255, 0.3);
+        }
+
+        .active-chord.hidden {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        /* Chord Reference */
+        .chord-reference {
+            max-height: 100%;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-medium);
+        }
+
+        .chord-reference::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chord-reference::-webkit-scrollbar-track {
+            background: var(--bg-medium);
+            border-radius: 3px;
+        }
+
+        .chord-reference::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        .chord-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(3, 0, 28, 0.4);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .chord-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chord-section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background: var(--primary-color);
+            box-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        .chord-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .chord-table th {
+            text-align: left;
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.3);
+            color: var(--text-dim);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .chord-table td {
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 500;
+        }
+
+        .chord-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .chord-table tr:nth-child(even) {
+            background: rgba(16, 10, 53, 0.3);
+        }
+
+        .chord-name {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .chord-notes {
+            color: var(--text-dim);
+        }
+
+        .finger-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+
+        .finger-active {
+            background: var(--primary-color);
+            box-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        .finger-inactive {
+            background: #444;
+        }
+
+        /* Footer Styling */
+        footer {
+            background: rgba(3, 0, 28, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem;
+            border-top: 2px solid var(--primary-color);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .footer-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        
+        .footer-logo span:first-child {
+            color: var(--primary-color);
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+        
+        .footer-logo span:last-child {
+            color: var(--secondary-color);
+            text-shadow: 0 0 10px var(--secondary-glow);
+        }
+        
+        .footer-text {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1.2rem;
+            margin-top: 0.5rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-light);
+            background: linear-gradient(45deg, var(--bg-medium), var(--bg-light));
+            border: 1px solid rgba(0, 247, 255, 0.3);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.3);
+        }
+        
+        .social-links a.github:hover {
+            background: #24292e;
+            border-color: #24292e;
+            color: white;
+        }
+        
+        .social-links a.twitter:hover {
+            background: #1DA1F2;
+            border-color: #1DA1F2;
+            color: white;
+        }
+        
+        .social-links a.linkedin:hover {
+            background: #0077B5;
+            border-color: #0077B5;
+            color: white;
+        }
+        
+        .social-links a.instagram:hover {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            border-color: #cc2366;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content {
+                gap: 0.5rem;
+            }
+            
+            .footer-logo {
+                font-size: 1.2rem;
+            }
+            
+            .social-links a {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .social-links {
+                gap: 0.8rem;
+            }
+            
+            .social-links a {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* Modal Popup */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 0, 28, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--bg-medium);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 170, 255, 0.3);
+            width: 90%;
+            max-width: 650px;
+            padding: 2.5rem;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            color: var(--text-dim);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(3, 0, 28, 0.6);
+        }
+
+        .modal-close:hover {
+            color: var(--primary-color);
+            background: rgba(0, 247, 255, 0.1);
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin-bottom: 1.8rem;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+        }
+
+        .modal-content p {
+            margin-bottom: 1.2rem;
+            line-height: 1.7;
+        }
+
+        /* Virtual Hand Guide */
+        .hand-guide {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 15px;
+            background: rgba(3, 0, 28, 0.8);
+            backdrop-filter: blur(8px);
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.3);
+        }
+
+        .hand-guide:hover {
+            opacity: 1;
+        }
+
+        .hand-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .finger-indicators {
+            display: flex;
+            gap: 5px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(3, 0, 28, 0.9);
+            backdrop-filter: blur(8px);
+            border-left: 4px solid var(--primary-color);
+            border-radius: 6px;
+            padding: 15px 20px;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.5s ease;
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 300px;
+        }
+
+        .notification.active {
+            transform: translateX(0);
+        }
+
+        .notification-icon {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        /* Developer Modal Styling - Improved Layout */
+        .developer-modal-content {
+            max-width: 800px;
+            padding: 2.5rem;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .developer-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0, 247, 255, 0.2);
+        }
+        
+        .developer-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .developer-info h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.3);
+        }
+        
+        .developer-title {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+        }
+        
+        .developer-education {
+            color: var(--text-light);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .university {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            margin-top: 0.2rem;
+        }
+        
+        .developer-bio {
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+        
+        .developer-bio p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .developer-bio h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+            margin: 2rem 0 1rem;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-shadow: 0 0 5px rgba(0, 247, 255, 0.5);
+        }
+        
+        .achievements {
+            margin-bottom: 2rem;
+        }
+        
+        .achievements h3 {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .achievements h3 i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .achievement-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.2rem;
+        }
+        
+        .achievement-item {
+            background: rgba(3, 0, 28, 0.4);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .achievement-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 247, 255, 0.2);
+            border-color: rgba(0, 247, 255, 0.4);
+        }
+        
+        .achievement-icon {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-dark);
+            font-size: 1.2rem;
+            box-shadow: 0 0 15px rgba(0, 247, 255, 0.4);
+            flex-shrink: 0;
+        }
+        
+        .achievement-text {
+            flex: 1;
+        }
+        
+        .achievement-text strong {
+            display: block;
+            margin-bottom: 0.3rem;
+            color: var(--primary-color);
+            font-size: 1.05rem;
+        }
+        
+        .achievement-text span {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .creative-projects {
+            background: rgba(3, 0, 28, 0.4);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .creative-projects h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .creative-projects h3 i {
+            margin-right: 0.5rem;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .creative-projects em {
+            color: var(--primary-color);
+            font-style: normal;
+            font-weight: 600;
+        }
+        
+        .connect-section {
+            text-align: center;
+            margin-top: 2.5rem;
+        }
+        
+        .motto {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 1.5rem 0;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+        
+        .developer-social {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            color: var(--text-light);
+            background: rgba(16, 10, 53, 0.6);
+            border: 2px solid rgba(0, 247, 255, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            min-width: 160px;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 247, 255, 0.3);
+        }
+        
+        .social-btn.github:hover {
+            background: #24292e;
+            border-color: #24292e;
+            color: white;
+        }
+        
+        .social-btn.linkedin:hover {
+            background: #0077B5;
+            border-color: #0077B5;
+            color: white;
+        }
+        
+        .social-btn.instagram:hover {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            border-color: #cc2366;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .developer-header {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .developer-modal-content {
+                padding: 1.5rem;
+            }
+            
+            .achievement-items {
+                grid-template-columns: 1fr;
+            }
+            
+            .developer-social {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .social-btn {
+                width: 100%;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1400px) {
+            main {
+                grid-template-columns: 280px 1fr 280px;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            main {
+                grid-template-columns: 250px 1fr 250px;
+            }
+            
+            .active-chord {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 992px) {
+            main {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+                height: auto;
+                gap: 1rem;
+            }
+            
+            .side-panel {
+                height: auto;
+                max-height: 400px;
+            }
+            
+            .video-container {
+                height: 65vh;
+                max-height: 65vh;
+                width: 100%;
+                aspect-ratio: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 0.5rem 1rem;
+            }
+            
+            .logo {
+                font-size: 1.5rem;
+            }
+            
+            nav {
+                gap: 1rem;
+            }
+            
+            .nav-link {
+                font-size: 0.9rem;
+            }
+            
+            .panel-title {
+                font-size: 1.1rem;
+            }
+            
+            .active-chord {
+                font-size: 1rem;
+            }
+            
+            .video-container {
+                height: 50vh;
+                max-height: 50vh;
+            }
+            
+            main {
+                padding: 1rem 0.5rem;
+            }
+            
+            .tracking-status, .instrument-display {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.7rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+            
+            .nav-link {
+                font-size: 0.8rem;
+                padding: 0.3rem 0;
+            }
+            
+            .overlay-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .status-indicator {
+                margin-top: 0.5rem;
+            }
+            
+            .btn {
+                padding: 0.7rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .video-container {
+                height: 40vh;
+                max-height: 40vh;
+                border-width: 1px;
+            }
+            
+            .hand-guide {
+                padding: 8px;
+                bottom: 20px;
+                top: auto;
+            }
+            
+            .active-chord {
+                font-size: 0.8rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        .loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-circle {
+            width: 80px;
+            height: 80px;
+            border: 4px solid transparent;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            position: relative;
+        }
+
+        .loader-circle::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 4px solid transparent;
+            border-bottom: 4px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear reverse infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-circle"></div>
+    </div>
+
+    <!-- Three.js background canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="container">
+        <header>
+            <div class="logo"><span>AIR</span><span>PIANO</span></div>
+            <nav>
+                <a href="#" class="nav-link active-link">Home</a>
+                <a href="#" class="nav-link" onclick="showHelpModal()">Tutorial</a>
+                <a href="#" class="nav-link" onclick="showAboutModal()">About</a>
+                <a href="#" class="nav-link" onclick="showDeveloperModal()">Developer</a>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Left Controls Panel -->
+            <section class="side-panel">
+                <div class="controls-section">
+                    <div class="panel-title">CONTROLS</div>
+                    <button id="start-btn" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start AirPiano
+                    </button>
+                    <button id="stop-btn" class="btn btn-danger" style="display: none;">
+                        <i class="fas fa-stop"></i> Stop AirPiano
+                    </button>
+                    <button id="calibrate-btn" class="btn btn-secondary">
+                        <i class="fas fa-sync-alt"></i> Recalibrate Camera
+                    </button>
+                    <button id="toggle-camera-btn" class="btn btn-secondary">
+                        <i class="fas fa-video"></i> Toggle Camera View
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="panel-title">SETTINGS</div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Sustain Time</span>
+                            <span id="sustain-value">2.0s</span>
+                        </div>
+                        <input type="range" min="0.5" max="5" step="0.1" value="2.0" class="slider" id="sustain-slider">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Sensitivity</span>
+                            <span id="sensitivity-value">0.8</span>
+                        </div>
+                        <input type="range" min="0.1" max="1" step="0.1" value="0.8" class="slider" id="sensitivity-slider">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Volume</span>
+                            <span id="volume-value">100%</span>
+                        </div>
+                        <input type="range" min="0" max="127" step="1" value="100" class="slider" id="volume-slider">
+                    </div>
+                    
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <span>Instrument</span>
+                        </div>
+                        <select id="instrument-selector" class="selector">
+                            <option value="0">Acoustic Grand Piano</option>
+                            <option value="1">Bright Acoustic Piano</option>
+                            <option value="4">Electric Piano</option>
+                            <option value="11">Vibraphone</option>
+                            <option value="19">Church Organ</option>
+                            <option value="24">Acoustic Guitar</option>
+                            <option value="32">Acoustic Bass</option>
+                            <option value="48">String Ensemble</option>
+                            <option value="73">Flute</option>
+                            <option value="80">Lead Synth</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Display Area -->
+            <section class="main-display">
+                <div class="video-container">
+                    <img id="video-feed" src="/video_feed" alt="Camera Feed">
+                    
+                    <div class="video-overlay">
+                        <div class="overlay-header">                            <div>
+                                <div class="tracking-status" id="tracking-status">TRACKING ACTIVE</div>
+                                <div class="instrument-display" id="instrument-display">Instrument: Acoustic Grand Piano</div>
+                            </div>
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                <span>LIVE</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Hand Guide Overlay -->
+                        <div class="hand-guide" id="left-hand-guide">
+                            <div class="hand-label">LEFT HAND</div>
+                            <div class="finger-indicators">
+                                <div class="finger-dot finger-inactive" id="left-thumb"></div>
+                                <div class="finger-dot finger-inactive" id="left-index"></div>
+                                <div class="finger-dot finger-inactive" id="left-middle"></div>
+                                <div class="finger-dot finger-inactive" id="left-ring"></div>
+                                <div class="finger-dot finger-inactive" id="left-pinky"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="hand-guide" id="right-hand-guide" style="right: 20px; left: auto;">
+                            <div class="hand-label">RIGHT HAND</div>
+                            <div class="finger-indicators">
+                                <div class="finger-dot finger-inactive" id="right-thumb"></div>
+                                <div class="finger-dot finger-inactive" id="right-index"></div>
+                                <div class="finger-dot finger-inactive" id="right-middle"></div>
+                                <div class="finger-dot finger-inactive" id="right-ring"></div>
+                                <div class="finger-dot finger-inactive" id="right-pinky"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="overlay-footer">
+                            <div class="active-chord hidden" id="active-chord-display"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <!-- Right Reference Panel -->
+            <section class="side-panel chord-reference">
+                <div class="panel-title">CHORD REFERENCE</div>
+
+                <div class="chord-section">
+                    <div class="chord-section-title">LEFT HAND - SINGLE FINGER</div>
+                    <table class="chord-table">
+                        <thead>
+                            <tr>
+                                <th>Finger</th>
+                                <th>Chord</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="left-single-chords">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chord-section">
+                    <div class="chord-section-title">RIGHT HAND - SINGLE FINGER</div>
+                    <table class="chord-table">
+                        <thead>
+                            <tr>
+                                <th>Finger</th>
+                                <th>Chord</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="right-single-chords">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chord-section">
+                    <div class="chord-section-title">LEFT HAND - COMBINATIONS</div>
+                    <table class="chord-table">
+                        <thead>
+                            <tr>
+                                <th>Fingers</th>
+                                <th>Chord</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="left-combo-chords">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="chord-section">
+                    <div class="chord-section-title">RIGHT HAND - COMBINATIONS</div>
+                    <table class="chord-table">
+                        <thead>
+                            <tr>
+                                <th>Fingers</th>
+                                <th>Chord</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody id="right-combo-chords">
+                            <!-- Will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-logo">AIR<span>PIANO</span></div>
+                <div class="footer-text">&copy; 2025 AirPiano - Advanced Gesture-Controlled Musical Interface</div>
+                <div class="social-links">
+                    <a href="https://github.com/Niteshagarwal01" target="_blank" title="GitHub" class="github"><i class="fab fa-github"></i></a>
+                    <a href="https://www.instagram.com/cosmic_nitesh_" target="_blank" title="Instagram" class="instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/nitesh-agarwal-9a1313317" target="_blank" title="LinkedIn" class="linkedin"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notifications -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">Title</div>
+            <div class="notification-message">Message text goes here</div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal('help-modal')">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-title">How to Use AirPiano</div>
+            <div>
+                <p>AirPiano is a revolutionary way to create music using just your hand gestures. Here's how to get started:</p>
+                
+                <ol style="margin-left: 20px; line-height: 1.6;">
+                    <li>Click the <strong>Start AirPiano</strong> button to begin hand tracking.</li>
+                    <li>Position your hands in view of the camera.</li>
+                    <li>Raise individual fingers to play single chords:
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>Thumb for D Major (left) or A Major (right)</li>
+                            <li>Index for E Minor (left) or B Minor (right)</li>
+                            <li>And more as shown in the Chord Reference panel</li>
+                        </ul>
+                    </li>
+                    <li>Combine fingers for special chord combinations.</li>
+                    <li>Lower your fingers to stop playing the chord (with sustain).</li>
+                </ol>
+                
+                <p>The piano visualization at the bottom shows which keys are being played, with different colors for left and right hand control.</p>
+                
+                <p>Adjust sustain time, sensitivity, and instrument selection in the Settings panel to customize your experience.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="about-modal">
+        <div class="modal-content">
+            <div class="modal-close" onclick="closeModal('about-modal')">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-title">About AirPiano</div>
+            <div>
+                <p>AirPiano is a cutting-edge musical interface that transforms hand gestures into beautiful chord progressions using computer vision technology.</p>
+                
+                <p>This project combines advanced hand tracking with MIDI sound synthesis to create an intuitive and engaging musical experience without requiring any physical instruments.</p>
+                
+                <p>Technologies used:</p>
+                <ul style="margin-left: 20px; line-height: 1.6;">
+                    <li>Hand tracking with OpenCV and MediaPipe</li>
+                    <li>Real-time sound generation with PyGame MIDI</li>
+                    <li>Web interface with Flask and Socket.IO</li>
+                    <li>3D visualizations with Three.js</li>
+                </ul>
+                
+                <p>This project was developed as a modern approach to music creation, making it accessible to everyone regardless of musical training.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="developer-modal">
+        <div class="modal-content developer-modal-content">
+            <div class="modal-close" onclick="closeModal('developer-modal')">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-title">Meet the Developer</div>
+            <div class="developer-profile">
+                <div class="developer-header">
+                    <div class="developer-info">
+                        <h2>Nitesh Agarwal</h2>
+                        <p class="developer-title">Developer • Designer • Storyteller</p>
+                        <div class="developer-education">
+                            <i class="fas fa-graduation-cap"></i> B.Tech Computer Science Engineering (Class of 2028)
+                            <div class="university">ADGIPS, GGSIPU</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="developer-bio">
+                    <p>Hey there! I'm Nitesh Agarwal — a passionate developer, designer, and storyteller.</p>
+                    
+                    <p>I specialize in crafting intuitive digital experiences through UI/UX design, building intelligent solutions with Python and software development, and expressing creativity through the written word.</p>
+                    
+                    <p>My journey has been driven by curiosity and a love for creation — from designing websites like FRIDAY, Delta_Front, and my own book's platform Finding Myself in the Lies, to exploring AI models inspired by JARVIS and FRIDAY.</p>
+                    
+                    <div class="achievements">
+                        <h3><i class="fas fa-trophy"></i> Achievements</h3>
+                        <div class="achievement-items">
+                            <div class="achievement-item">
+                                <div class="achievement-icon"><i class="fas fa-medal"></i></div>
+                                <div class="achievement-text">
+                                    <strong>1st Place @ IIT Delhi Tryst'25</strong>
+                                    <span>Techno War</span>
+                                </div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-icon"><i class="fas fa-award"></i></div>
+                                <div class="achievement-text">
+                                    <strong>Finalist</strong>
+                                    <span>Vihaan 8.0</span>
+                                </div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-icon"><i class="fas fa-laptop-code"></i></div>
+                                <div class="achievement-text">
+                                    <strong>Attendee</strong>
+                                    <span>Smart India Hackathon (SIH) & Software Development Initiative (SDI'25)</span>
+                                </div>
+                            </div>
+                            <div class="achievement-item">
+                                <div class="achievement-icon"><i class="fas fa-pen-fancy"></i></div>
+                                <div class="achievement-text">
+                                    <strong>Ex-Content Head</strong>
+                                    <span>Word Wizards, the official student development society of ADGIPS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="creative-projects">
+                        <h3><i class="fas fa-book"></i> Creative Projects</h3>
+                        <p>Outside of code and design, I'm a writer at heart — currently working on my next book, <em>"The Beauty of Imagination of Love"</em>.</p>
+                        <p>My previous book, <em>"Finding Myself in the Lies"</em>, reflects my passion for storytelling and connecting with readers through emotional narratives.</p>
+                    </div>
+                    
+                    <div class="connect-section">
+                        <h3><i class="fas fa-handshake"></i> Let's Connect</h3>
+                        <p>Whether it's solving complex problems, designing for impact, or writing stories that connect, I'm always looking to learn, innovate, and create something meaningful.</p>
+                        <p class="motto">Let's build the future, beautifully.</p>
+                        
+                        <div class="developer-social">
+                            <a href="https://github.com/Niteshagarwal01" target="_blank" title="GitHub" class="social-btn github">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="https://www.linkedin.com/in/nitesh-agarwal-9a1313317" target="_blank" title="LinkedIn" class="social-btn linkedin">
+                                <i class="fab fa-linkedin"></i> LinkedIn
+                            </a>
+                            <a href="https://www.instagram.com/cosmic_nitesh_" target="_blank" title="Instagram" class="social-btn instagram">
+                                <i class="fab fa-instagram"></i> Instagram
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Three.js Background
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            canvas: document.getElementById('bg-canvas'),
+            alpha: true
+        });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        
+        camera.position.z = 30;
+        
+        // Create Stars
+        function addStar() {
+            const geometry = new THREE.SphereGeometry(0.15, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+            
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100));
+            
+            star.position.set(x, y, z);
+            scene.add(star);
+            return star;
+        }
+        
+        // Create Grid Lines
+        function createGrid() {
+            const gridGeometry = new THREE.BufferGeometry();
+            const gridMaterial = new THREE.LineBasicMaterial({
+                color: 0x00f7ff,
+                transparent: true,
+                opacity: 0.2
+            });
+            
+            const gridSize = 30;
+            const gridDivisions = 20;
+            const gridStep = gridSize / gridDivisions;
+            const gridVertices = [];
+            
+            // Create horizontal and vertical lines
+            for (let i = -gridSize/2; i <= gridSize/2; i += gridStep) {
+                gridVertices.push(
+                    -gridSize/2, i, 0,
+                    gridSize/2, i, 0,
+                    i, -gridSize/2, 0,
+                    i, gridSize/2, 0
+                );
+            }
+            
+            gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(gridVertices, 3));
+            const grid = new THREE.LineSegments(gridGeometry, gridMaterial);
+            grid.rotation.x = Math.PI / 2;
+            grid.position.z = -20;
+            
+            scene.add(grid);
+            return grid;
+        }
+        
+        // Add some ambient light
+        const ambientLight = new THREE.AmbientLight(0x404040);
+        scene.add(ambientLight);
+        
+        // Add a directional light
+        const directionalLight = new THREE.DirectionalLight(0x00f7ff, 1);
+        directionalLight.position.set(0, 0, 1);
+        scene.add(directionalLight);
+        
+        // Create stars and grid
+        const stars = Array(200).fill().map(addStar);
+        const grid = createGrid();
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Rotate the grid slowly
+            grid.rotation.z += 0.001;
+            
+            // Make stars twinkle
+            stars.forEach((star, i) => {
+                const t = Date.now() * 0.001;
+                star.material.opacity = 0.4 + 0.6 * Math.sin(t + i * 0.1);
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Active Chord Display
+        function updateActiveChord(chordName) {
+            const chordDisplay = document.getElementById('active-chord-display');
+            
+            if (chordName) {
+                chordDisplay.textContent = chordName;
+                chordDisplay.classList.remove('hidden');
+            } else {
+                chordDisplay.classList.add('hidden');
+            }
+        }
+
+        // Finger Indicators
+        function updateFingerIndicators(hand, fingers) {
+            const fingerNames = ["thumb", "index", "middle", "ring", "pinky"];
+            
+            fingerNames.forEach((finger, index) => {
+                const indicator = document.getElementById(`${hand}-${finger}`);
+                if (indicator) {
+                    if (fingers[index] === 1) {
+                        indicator.classList.remove('finger-inactive');
+                        indicator.classList.add('finger-active');
+                    } else {
+                        indicator.classList.remove('finger-active');
+                        indicator.classList.add('finger-inactive');
+                    }
+                }
+            });
+        }
+
+        // Load chord data
+        async function loadChordData() {
+            try {
+                const response = await fetch('/chords_data');
+                const data = await response.json();
+                
+                populateChordTables(data);
+            } catch (error) {
+                console.error('Error loading chord data:', error);
+                showNotification('Error', 'Failed to load chord data', 'error');
+            }
+        }
+
+        // Populate chord reference tables
+        function populateChordTables(data) {
+            const noteNames = {
+                61: "C#", 62: "D", 64: "E", 65: "F", 66: "F#", 67: "G", 68: "G#", 69: "A", 
+                70: "Bb", 71: "B", 72: "C", 73: "C#", 74: "D", 76: "E", 77: "F", 78: "F#", 79: "G"
+            };
+            
+            function getNoteNames(notes) {
+                return notes.map(note => noteNames[note] || note).join(", ");
+            }
+            
+            // Populate left hand single chords
+            const leftSingleTable = document.getElementById('left-single-chords');
+            for (const [finger, chord] of Object.entries(data.single_chords.left)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${finger.charAt(0).toUpperCase() + finger.slice(1)}</td>
+                    <td>${chord.name}</td>
+                    <td>${getNoteNames(chord.notes)}</td>
+                `;
+                leftSingleTable.appendChild(row);
+            }
+            
+            // Populate right hand single chords
+            const rightSingleTable = document.getElementById('right-single-chords');
+            for (const [finger, chord] of Object.entries(data.single_chords.right)) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${finger.charAt(0).toUpperCase() + finger.slice(1)}</td>
+                    <td>${chord.name}</td>
+                    <td>${getNoteNames(chord.notes)}</td>
+                `;
+                rightSingleTable.appendChild(row);
+            }
+            
+            // Populate left hand combo chords
+            const leftComboTable = document.getElementById('left-combo-chords');
+            for (const [combo, chord] of Object.entries(data.combo_chords.left)) {
+                const row = document.createElement('tr');
+                const fingers = combo.replace('_', ' + ');
+                row.innerHTML = `
+                    <td>${fingers.charAt(0).toUpperCase() + fingers.slice(1)}</td>
+                    <td>${chord.name}</td>
+                    <td>${getNoteNames(chord.notes)}</td>
+                `;
+                leftComboTable.appendChild(row);
+            }
+            
+            // Populate right hand combo chords
+            const rightComboTable = document.getElementById('right-combo-chords');
+            for (const [combo, chord] of Object.entries(data.combo_chords.right)) {
+                const row = document.createElement('tr');
+                const fingers = combo.replace('_', ' + ');
+                row.innerHTML = `
+                    <td>${fingers.charAt(0).toUpperCase() + fingers.slice(1)}</td>
+                    <td>${chord.name}</td>
+                    <td>${getNoteNames(chord.notes)}</td>
+                `;
+                rightComboTable.appendChild(row);
+            }
+        }
+
+        // Show notification
+        function showNotification(title, message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const titleElement = notification.querySelector('.notification-title');
+            const messageElement = notification.querySelector('.notification-message');
+            const iconElement = notification.querySelector('.notification-icon i');
+            
+            // Set content
+            titleElement.textContent = title;
+            messageElement.textContent = message;
+            
+            // Set icon based on type
+            iconElement.className = 'fas';
+            switch(type) {
+                case 'success':
+                    iconElement.classList.add('fa-check-circle');
+                    iconElement.style.color = 'var(--success)';
+                    break;
+                case 'warning':
+                    iconElement.classList.add('fa-exclamation-triangle');
+                    iconElement.style.color = 'var(--warning)';
+                    break;
+                case 'error':
+                    iconElement.classList.add('fa-times-circle');
+                    iconElement.style.color = 'var(--danger)';
+                    break;
+                default:
+                    iconElement.classList.add('fa-info-circle');
+                    iconElement.style.color = 'var(--primary-color)';
+            }
+            
+            // Show notification
+            notification.classList.add('active');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('active');
+            }, 5000);
+        }
+
+        // Modal functions
+        function showHelpModal() {
+            document.getElementById('help-modal').style.display = 'flex';
+        }
+        
+        function showAboutModal() {
+            document.getElementById('about-modal').style.display = 'flex';
+        }
+        
+        function showDeveloperModal() {
+            document.getElementById('developer-modal').style.display = 'flex';
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // Connect all UI controls to server API
+        
+        // Settings sliders - update server settings
+        const sustainSlider = document.getElementById('sustain-slider');
+        const sustainValue = document.getElementById('sustain-value');
+        sustainSlider.addEventListener('input', () => {
+            sustainValue.textContent = sustainSlider.value + 's';
+        });
+        
+        sustainSlider.addEventListener('change', () => {
+            updateServerSetting('sustain_time', parseFloat(sustainSlider.value));
+        });
+        
+        const sensitivitySlider = document.getElementById('sensitivity-slider');
+        const sensitivityValue = document.getElementById('sensitivity-value');
+        sensitivitySlider.addEventListener('input', () => {
+            sensitivityValue.textContent = sensitivitySlider.value;
+        });
+        
+        sensitivitySlider.addEventListener('change', () => {
+            updateServerSetting('sensitivity', parseFloat(sensitivitySlider.value));
+        });
+        
+        const volumeSlider = document.getElementById('volume-slider');
+        const volumeValue = document.getElementById('volume-value');
+        volumeSlider.addEventListener('input', () => {
+            const percentage = Math.round((volumeSlider.value / 127) * 100);
+            volumeValue.textContent = percentage + '%';
+        });
+        
+        volumeSlider.addEventListener('change', () => {
+            updateServerSetting('volume', parseInt(volumeSlider.value));
+        });
+        
+        // Instrument selector - Connect to backend
+        const instrumentSelector = document.getElementById('instrument-selector');
+        instrumentSelector.addEventListener('change', () => {
+            fetch('/switch_instrument', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ instrument_id: parseInt(instrumentSelector.value) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Instrument Changed', `Switched to ${data.name}`, 'success');
+                } else {
+                    showNotification('Error', data.message || 'Failed to switch instrument', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Network error while switching instrument', 'error');
+                console.error('Error:', error);
+            });
+        });
+        
+        // Function to update server settings
+        function updateServerSetting(setting, value) {
+            const data = {};
+            data[setting] = value;
+            
+            fetch('/update_settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Setting Updated', `${setting.replace('_', ' ')} has been updated`, 'success');
+                } else {
+                    showNotification('Error', data.message || 'Failed to update setting', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Network error while updating setting', 'error');
+                console.error('Error:', error);
+            });
+        }
+        
+        // Start/Stop AirPiano controls
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        
+        startBtn.addEventListener('click', () => {
+            fetch('/start_tracking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'block';
+                    showNotification('AirPiano Started', 'Hand tracking is now active', 'success');
+                    document.querySelector('.status-dot').style.background = 'var(--success)';
+                    document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--success)';
+                } else {
+                    showNotification('Error', data.message || 'Failed to start tracking', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Network error while starting AirPiano', 'error');
+                console.error('Error:', error);
+            });
+        });
+        
+        stopBtn.addEventListener('click', () => {
+            fetch('/stop_tracking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    stopBtn.style.display = 'none';
+                    startBtn.style.display = 'block';
+                    showNotification('AirPiano Stopped', 'Hand tracking has been stopped', 'warning');
+                    document.querySelector('.status-dot').style.background = 'var(--danger)';
+                    document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--danger)';
+                } else {
+                    showNotification('Error', data.message || 'Failed to stop tracking', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Network error while stopping AirPiano', 'error');
+                console.error('Error:', error);
+            });
+        });
+
+        // Calibrate camera
+        const calibrateBtn = document.getElementById('calibrate-btn');
+        calibrateBtn.addEventListener('click', () => {
+            showNotification('Calibrating', 'Camera calibration in progress...', 'info');
+            
+            fetch('/calibrate_camera', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification('Calibration Complete', 'Camera has been calibrated successfully', 'success');
+                } else {
+                    showNotification('Error', data.message || 'Failed to calibrate camera', 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error', 'Network error during calibration', 'error');
+                console.error('Error:', error);
+            });
+        });
+        
+        // Toggle camera view (hide/show)
+        const toggleCameraBtn = document.getElementById('toggle-camera-btn');
+        const videoFeed = document.getElementById('video-feed');
+        let cameraVisible = true;
+        
+        toggleCameraBtn.addEventListener('click', () => {
+            cameraVisible = !cameraVisible;
+            if (cameraVisible) {
+                videoFeed.style.display = 'block';
+                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Hide Camera';
+                showNotification('Camera', 'Camera view enabled', 'info');
+            } else {
+                videoFeed.style.display = 'none';
+                toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Show Camera';
+                showNotification('Camera', 'Camera view disabled', 'info');
+            }
+        });
+
+        // Polling functions for real-time updates
+        
+        // Poll for active chords and hands
+        function pollActiveData() {
+            fetch('/active_chords')
+                .then(response => response.json())
+                .then(data => {
+                    // Update active chords display
+                    const activeChords = data.active_chords;
+                    if (activeChords && activeChords.length > 0) {
+                        updateActiveChord(activeChords.join(', '));
+                    } else {
+                        updateActiveChord(null);
+                    }
+                    
+                    // Update hand indicators
+                    if (data.active_hands && data.active_hands.includes('left')) {
+                        document.getElementById('left-hand-guide').style.display = 'flex';
+                    } else {
+                        document.getElementById('left-hand-guide').style.display = 'none';
+                    }
+                    
+                    if (data.active_hands && data.active_hands.includes('right')) {
+                        document.getElementById('right-hand-guide').style.display = 'flex';
+                    } else {
+                        document.getElementById('right-hand-guide').style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error polling active chords:', error));
+        }
+        
+        // Poll for system status
+        function pollSystemStatus() {
+            fetch('/get_status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update tracking status
+                    const trackingStatus = document.getElementById('tracking-status');
+                    if (data.tracking_active) {
+                        startBtn.style.display = 'none';
+                        stopBtn.style.display = 'block';
+                        document.querySelector('.status-dot').style.background = 'var(--success)';
+                        document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--success)';
+                        trackingStatus.textContent = 'TRACKING ACTIVE';
+                        trackingStatus.classList.remove('tracking-inactive');
+                    } else {
+                        startBtn.style.display = 'block';
+                        stopBtn.style.display = 'none';
+                        document.querySelector('.status-dot').style.background = 'var(--danger)';
+                        document.querySelector('.status-dot').style.boxShadow = '0 0 10px var(--danger)';
+                        trackingStatus.textContent = 'TRACKING PAUSED';
+                        trackingStatus.classList.add('tracking-inactive');
+                    }
+                    
+                    // Update instrument display
+                    document.getElementById('instrument-display').textContent = `Instrument: ${data.instrument_name}`;
+                    
+                    // Update settings sliders to match server state
+                    sustainSlider.value = data.settings.sustain_time;
+                    sustainValue.textContent = data.settings.sustain_time + 's';
+                    
+                    sensitivitySlider.value = data.settings.sensitivity;
+                    sensitivityValue.textContent = data.settings.sensitivity;
+                    
+                    volumeSlider.value = data.settings.volume;
+                    volumeValue.textContent = Math.round((data.settings.volume / 127) * 100) + '%';
+                })
+                .catch(error => console.error('Error polling system status:', error));
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Load chord data
+            loadChordData();
+            
+            // Hide loader after checking for active connection
+            fetch('/get_status')
+                .then(response => {
+                    if (response.ok) {
+                        setTimeout(() => {
+                            document.getElementById('loader').classList.add('hidden');
+                        }, 1500);
+                    } else {
+                        document.getElementById('loader').classList.add('hidden');
+                        showNotification('Connection Error', 'Could not connect to AirPiano server', 'error');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Initialize UI based on server state
+                    pollSystemStatus();
+                })
+                .catch(error => {
+                    document.getElementById('loader').classList.add('hidden');
+                    showNotification('Connection Error', 'Could not connect to AirPiano server', 'error');
+                    console.error('Error:', error);
+                });
+            
+            // Start polling for data updates
+            setInterval(pollActiveData, 100);  // Fast polling for active chords/notes
+            setInterval(pollSystemStatus, 2000); // Slower polling for system status
+            
+            // Show welcome notification
+            setTimeout(() => {
+                showNotification('Welcome to AirPiano', 'Click "Start AirPiano" to begin playing with hand gestures', 'info');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
